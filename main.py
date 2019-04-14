@@ -5,7 +5,17 @@ app = Flask(__name__)
 
 app.config['DEBUG'] = True
 
-@app.route("/validate-signup", methods=['POST'])
+@app.route("/", methods=['GET'])
+def index():
+    return render_template('welcome_form.html')
+
+@app.route("/welcome")
+def welcome():
+    #take name from request
+    username = request.args.get('user_name')
+    return render_template("welcome_greeting.html", name=username)
+
+@app.route("/", methods=['POST'])
 def validate_signup():
 
     username = request.form['user_name']
@@ -26,7 +36,7 @@ def validate_signup():
         username_error = "That is not a valid username"
         username = ''
     elif " " in username or len(username) < 3 or len(username) > 20:
-        username_error = "That is not a valid username"
+        username_error = "Username must not contain spaces, and must be between 3-20 characters"
         username = ''
 
     #password 
@@ -37,7 +47,7 @@ def validate_signup():
         password_error = "That is not a valid password"
         password = ''
     elif " " in password or len(password) < 3 or len(password) > 20:
-        password_error = "That is not a valid password"
+        password_error = "Username must not contain spaces, and must be between 3-20 characters"
         password = ''
 
     #additional password verification field
@@ -57,7 +67,7 @@ def validate_signup():
     #contains no spaces
     #between 3 and 20 characters long
     #preserve what the user types
-    if len(email) < 3 or len(email) > 20:
+    if len(email) > 0 and len(email) < 3 or len(email) > 20:
         email_error = "Email length must be between 3 and 20 characters"
         email = ""
     elif " " in email:
@@ -79,7 +89,7 @@ def validate_signup():
                 email = ""
     
     if not username_error and not password_error and not password_check_error and not email_error:
-        return redirect('/welcome')
+        return redirect('/welcome?user_name={0}'.format(username))
     else:
         return render_template('welcome_form.html', username_error=username_error,
                password_error=password_error, password_conf_error=password_check_error,
@@ -90,14 +100,5 @@ def validate_signup():
         
 
 
-@app.route("/")
-def index():
-    return render_template('welcome_form.html')
-
-@app.route("/welcome", methods=['POST'])
-def welcome():
-    #take name from request
-    username = request.form['user_name']
-    return render_template("welcome_greeting.html", name=username)
 
 app.run()
